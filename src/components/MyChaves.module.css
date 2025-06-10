@@ -15,8 +15,8 @@
   box-shadow: 0.5rem 0.5rem 1rem rgba(0, 0, 0, 0.5);
   font-size: 3rem;
   /* O flex ai ó, dentro dos cards*/
-  display: flex; 
-  flex-direction: column ;
+  display: flex;
+  flex-direction: column;
   align-items: center;
 }
 
@@ -33,7 +33,31 @@
   grid-template-columns: 1fr 3fr 1fr;
   grid-template-rows: 10rem 5rem auto 10rem 10rem;
 
+
+
 }
+
+  @media (max-width: 1200px) {
+    .container {
+    grid-template-areas:
+      "header1 header1 header1"
+      "left header2 header2"
+      "left main main"
+      "left footer footer"
+      "footer2 footer2 footer2";
+    }
+  }
+
+@media (max-width: 768px) {
+    .container {
+      grid-template-areas:
+        "header2 header2"
+        "main main"
+        "footer footer";
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 5rem auto 10rem;
+    }
+  }
 
 .header1 {
   grid-area: header1;
@@ -53,9 +77,6 @@
 .asideRight {
   grid-area: right;
   background-color: deeppink;
-  @media (max-width: 1200px){
-    display:none;
-  }
 }
 
 .footer {
@@ -70,3 +91,6 @@
 
 }
 
+.main {
+  grid-area: main;
+}

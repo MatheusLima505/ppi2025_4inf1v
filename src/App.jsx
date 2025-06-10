@@ -20,7 +20,10 @@ export default function App() {
   return (
     //React Fragment
     <>
-      <button onClick={handleDesafio}>Desafio</button>
+    <div className="top">
+      <button className="button" onClick={handleDesafio}>CLICKE EM MIM!!!</button>
+      <h3 className="h3">Aperte o botão acima para visualizar a atividade</h3>
+    </div>
       {desafio==false ? <MyGrid /> : <MyChaves />}
     </>
   );
