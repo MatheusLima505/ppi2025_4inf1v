@@ -1,9 +1,9 @@
 import { useContext } from "react";
 import styles from "./User.module.css";
-import { CartContext } from "../context/CartContext";
+import { SessionContext } from "../context/SessionContext";
 
 export function User() {
-  const { session, handleSignOut } = useContext(CartContext);
+  const { session, handleSignOut } = useContext(SessionContext);
   return (
     <div>
       {session ? (

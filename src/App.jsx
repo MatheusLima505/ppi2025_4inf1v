@@ -1,3 +1,4 @@
+import { SessionProvider } from "./context/SessionContext";
 import "./styles/theme.css";
 import "./styles/global.css";
 import { ProductList } from "./components/ProductList";
@@ -15,6 +16,7 @@ export default function App() {
     <>
       <ToastContainer />
       <CartProvider>
+        <SessionProvider>
         <Header />
         <Routes>
           <Route path="/" element={<ProductList />} />
@@ -23,6 +25,7 @@ export default function App() {
           <Route path="/register" element={<Login value="register" />} />
           <Route path="/user" element={<User />} />
         </Routes>
+        </SessionProvider>
       </CartProvider>
     </>
   );
