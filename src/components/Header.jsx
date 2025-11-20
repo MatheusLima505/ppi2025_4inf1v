@@ -1,12 +1,16 @@
 import styles from "./Header.module.css";
 import { ShoppingBasket } from "lucide-react";
-import { Link } from "react-router";
+import { Link } from "react-router-dom"; // Usando react-router-dom Link
 import { useContext } from "react";
 import { CartContext } from "../context/CartContext";
+import { SessionContext } from "../context/SessionContext";
 import { ThemeToggle } from "./ThemeToggle";
 
 export function Header() {
-  const { cart, session } = useContext(CartContext);
+  const { cart } = useContext(CartContext);
+  const { session } = useContext(SessionContext);
+  // isAdmin ainda é útil para mostrar o ícone de estrela na mensagem de boas-vindas
+  const isAdmin = session?.user?.user_metadata?.admin === true; 
 
   return (
     <div className={styles.container}>
@@ -16,7 +20,8 @@ export function Header() {
         </Link>
         {session && (
           <Link to="/user" className={styles.welcomeMessage}>
-            Welcome, {session.user.user_metadata.username} {session.user.user_metadata.admin && '⭐'}
+            Welcome, {session.user.user_metadata.username}{" "}
+            {isAdmin && "⭐"} {/* Exibe estrela se for Admin */}
           </Link>
         )}
       </div>
@@ -32,6 +37,7 @@ export function Header() {
             </Link>
           </>
         )}
+        {/* O link '/admin' foi removido daqui */}
         <ThemeToggle />
         <Link to="/cart" className={styles.link}>
           <div className={styles.cartInfo}>

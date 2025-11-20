@@ -1,25 +1,19 @@
 import styles from "./Login.module.css";
 import { useState, useContext, useEffect } from "react";
-import { SessionContext } from "../context/SessionContext";
+import { SessionContext } from "../context/SessionContext"; // Importa o contexto de autenticação
 import { Field } from "@base-ui-components/react/field";
 import { Form } from "@base-ui-components/react/form";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
-import { toast, Bounce } from "react-toastify";
 import { CircularProgress } from "@mui/material";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom"; // Use react-router-dom
 
 export function Login({ value }) {
-  // User Context
-  const {
-    handleSignIn,
-    handleSignUp,
-    session,
-    sessionLoading,
-    sessionMessage,
-    sessionError,
-  } = useContext(SessionContext);
+  const { handleSignIn, handleSignUp, session, sessionLoading } =
+    useContext(SessionContext);
 
   const navigate = useNavigate();
+  
+  // Redireciona se o usuário já estiver logado
   useEffect(() => {
     if (session) {
       navigate("/");
@@ -27,8 +21,7 @@ export function Login({ value }) {
   }, [session, navigate]);
 
   const [errors, setErrors] = useState({});
-  // const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState(value); // "signin" or "register"
+  const [mode, setMode] = useState(value);
   const [showPassword, setShowPassword] = useState(false);
   const [formValues, setFormValues] = useState({
     email: "",
@@ -40,57 +33,10 @@ export function Login({ value }) {
   useEffect(() => {
     setMode(value);
   }, [value]);
-
-  useEffect(() => {
-    // Monitor changes in sessionMessage and sessionError
-    if (sessionMessage) {
-      toast.success(sessionMessage, {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: false,
-        progress: undefined,
-        style: { fontSize: "1.5rem" },
-        theme: localStorage.getItem("theme"),
-        transition: Bounce,
-      });
-    } else {
-      if (sessionError) {
-        if (sessionError === "Email not confirmed") {
-          toast.info(sessionError, {
-            position: "top-center",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: false,
-            progress: undefined,
-            style: { fontSize: "1.5rem" },
-            theme: localStorage.getItem("theme"),
-            transition: Bounce,
-          });
-        } else {
-          toast.error(sessionError, {
-            position: "top-center",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: false,
-            progress: undefined,
-            style: { fontSize: "1.5rem" },
-            theme: localStorage.getItem("theme"),
-            transition: Bounce,
-          });
-        }
-      }
-    }
-  }, [sessionMessage, sessionError]);
   
   async function handleSubmit(e) {
     e.preventDefault();
 
-    // Basic validation
-    // TODO: Buscar por REGEXP 
     const newErrors = {};
     if (!formValues.email) newErrors.email = "Email is required";
     if (!formValues.password) newErrors.password = "Password is required";
@@ -104,11 +50,18 @@ export function Login({ value }) {
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
+    // Chama as funções do SessionContext para autenticação
     if (mode === "signin") {
-      handleSignIn(formValues.email, formValues.password);
+      await handleSignIn(formValues.email, formValues.password);
     } else {
-      handleSignUp(formValues.email, formValues.password, formValues.username);
+      await handleSignUp(
+        formValues.email,
+        formValues.password,
+        formValues.username
+      );
     }
+
+    // Limpa o formulário após a tentativa
     setFormValues({
       email: "",
       password: "",
@@ -243,12 +196,12 @@ export function Login({ value }) {
         </button>
       </Form>
       {mode === "register" && (
-        <button onClick={() => setMode("signin")} className={styles.info}>
+        <button onClick={() => navigate("/signin")} className={styles.info}>
           Already have an account? Click here!
         </button>
       )}
       {mode === "signin" && (
-        <button onClick={() => setMode("register")} className={styles.info}>
+        <button onClick={() => navigate("/register")} className={styles.info}>
           Don't have an account? Click here!
         </button>
       )}

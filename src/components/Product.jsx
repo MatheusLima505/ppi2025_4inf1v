@@ -2,9 +2,11 @@ import styles from "./Product.module.css";
 import { useContext } from "react";
 import { CartContext } from "../context/CartContext";
 import { Link } from "react-router";
+import { SessionContext } from "../context/SessionContext";
 
 export function Product({ product }) {
   const { addToCart } = useContext(CartContext);
+    const { session } = useContext(SessionContext)
 
   return (
     <div key={product.id} className={styles.productCard}>
@@ -17,6 +19,7 @@ export function Product({ product }) {
       <p className={styles.productDescription}>{product.description}</p>
       <p className={styles.productPrice}>${product.price}</p>
       {/* <Link to="/cart"> */}
+      { session && (
       <button
         onClick={() => {
           addToCart(product);
@@ -25,6 +28,7 @@ export function Product({ product }) {
       >
         ADD TO CART
       </button>
+      )}
       {/* </Link> */}
     </div>
   );

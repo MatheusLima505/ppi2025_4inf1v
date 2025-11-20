@@ -3,10 +3,13 @@ import { CircularProgress } from "@mui/material";
 import { Product } from "./Product";
 import { useState, useContext, useEffect, useRef } from "react";
 import { CartContext } from "../context/CartContext";
+import { SessionContext } from "../context/SessionContext";
 
 export function ProductList() {
   
   const { products, loading, error } = useContext(CartContext);
+
+  const { Session } = useContext(SessionContext)
 
   const [filteredProducts, setFilteredProducts] = useState([]);
 

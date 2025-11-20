@@ -1,31 +1,60 @@
 import { useState, useEffect, createContext } from "react";
 import { supabase } from "../utils/supabase";
+import { toast, Bounce } from "react-toastify";
 
 export const SessionContext = createContext({
-  // Context to manage user session
   session: null,
   sessionLoading: false,
-  sessionMessage: null,
-  sessionError: null,
   handleSignUp: () => {},
   handleSignIn: () => {},
   handleSignOut: () => {},
 });
 
 export function SessionProvider({ children }) {
-  // User Session Management
   const [session, setSession] = useState(null);
   const [sessionLoading, setSessionLoading] = useState(false);
   const [sessionMessage, setSessionMessage] = useState(null);
   const [sessionError, setSessionError] = useState(null);
 
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (sessionMessage) {
+      toast.success(sessionMessage, {
+        position: "top-center",
+        autoClose: 5000,
+        theme: localStorage.getItem("theme"),
+        transition: Bounce,
+      });
+      setSessionMessage(null);
+    }
+    if (sessionError) {
+      toast.error(sessionError, {
+        position: "top-center",
+        autoClose: 5000,
+        theme: localStorage.getItem("theme"),
+        transition: Bounce,
+      });
+      setSessionError(null);
+    }
+  }, [sessionMessage, sessionError]);
+
   async function handleSignUp(email, password, username) {
     setSessionLoading(true);
-    setSessionMessage(null);
-    setSessionError(null);
-
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -38,15 +67,13 @@ export function SessionProvider({ children }) {
       });
 
       if (error) throw error;
-
-      if (data.user) {
-        setSessionMessage(
-          "Registration successful! Check your email to confirm your account."
-        );
-        window.location.href = "/signin";
-      }
+      setSessionMessage(
+        "Registration successful! Check your email to confirm your account."
+      );
+      return { success: true };
     } catch (error) {
       setSessionError(error.message);
+      return { success: false };
     } finally {
       setSessionLoading(false);
     }
@@ -54,9 +81,6 @@ export function SessionProvider({ children }) {
 
   async function handleSignIn(email, password) {
     setSessionLoading(true);
-    setSessionMessage(null);
-    setSessionError(null);
-
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -64,13 +88,13 @@ export function SessionProvider({ children }) {
       });
 
       if (error) throw error;
-
-      if(data.session){
-        setSession(data.session);
+      if (data.session) {
         setSessionMessage("Sign in successful!");
       }
+      return { success: true };
     } catch (error) {
       setSessionError(error.message);
+      return { success: false };
     } finally {
       setSessionLoading(false);
     }
@@ -78,16 +102,10 @@ export function SessionProvider({ children }) {
 
   async function handleSignOut() {
     setSessionLoading(true);
-    setSessionMessage(null);
-    setSessionError(null);
-
     try {
       const { error } = await supabase.auth.signOut();
-
       if (error) throw error;
-
-      setSession(null);
-      window.location.href = "/";
+      setSessionMessage("Sign out successful!");
     } catch (error) {
       setSessionError(error.message);
     } finally {
@@ -96,17 +114,16 @@ export function SessionProvider({ children }) {
   }
 
   const context = {
-    // Context to manage user session
-    session: session,
-    sessionLoading: sessionLoading,
-    sessionMessage: sessionMessage,
-    sessionError: sessionError,
-    handleSignUp: handleSignUp,
-    handleSignIn: handleSignIn,
-    handleSignOut: handleSignOut,
+    session,
+    sessionLoading,
+    handleSignUp,
+    handleSignIn,
+    handleSignOut,
   };
 
   return (
-    <SessionContext.Provider value={context}>{children}</SessionContext.Provider>
+    <SessionContext.Provider value={context}>
+      {children}
+    </SessionContext.Provider>
   );
 }

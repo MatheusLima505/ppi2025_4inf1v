@@ -1,39 +1,227 @@
+/* --- CONTAINER PRINCIPAL --- */
 .container {
+  width: 100%;
+  max-width: 900px;
+  margin: 8rem auto;
+  padding: 2.5rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  margin-top: 15rem;
-  gap: 2rem;
-  padding: 2rem;
+  gap: 3rem;
+  background: rgba(255,255,255,0.05);
+  border-radius: 1.5rem;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.1);
 }
 
+/* Títulos */
 .container h1 {
-  font-size: 4rem;
+  font-size: 3.5rem;
+  text-align: center;
   color: var(--primary);
-  margin-bottom: 1rem;
+  font-weight: 800;
+  letter-spacing: 1px;
 }
 
-.userInfo{
+/* --- INFOS DO USUÁRIO --- */
+.userInfoSection {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  font-size: 2rem;
+  gap: 2rem;
 }
 
+.userInfo {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.fields {
+  width: 100%;
+  max-width: 450px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Labels */
+.label {
+  font-size: 1.4rem;
+  color: var(--gray-200);
+  margin-bottom: -0.5rem;
+}
+
+/* Inputs somente leitura */
+.input {
+  width: 100%;
+  padding: 1.2rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.06);
+  color: white;
+  font-size: 1.8rem;
+  transition: 0.2s;
+}
+
+.input:focus {
+  outline: 2px solid var(--primary);
+}
+
+/* Botão de sair */
 .button {
-  margin-top: 0.5rem;
-  padding: 1.5rem 3rem;
+  margin-top: 1rem;
+  padding: 1.5rem;
   border: none;
   border-radius: 0.75rem;
   background-color: var(--primary);
   color: var(--gray-900);
-  font-size: 2rem;
-  font-weight: bolder;
-  transition: all 0.2s ease;
+  font-size: 1.8rem;
+  font-weight: bold;
   cursor: pointer;
+  transition: 0.2s;
 }
 
 .button:hover {
   background-color: var(--primary-dark);
+}
+
+/* --- PAINEL ADMIN --- */
+.adminPanel {
+  margin-top: 3rem;
+  background: rgba(255,255,255,0.04);
+  padding: 2.5rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.adminTitle {
+  color: var(--primary);
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.addButton {
+  background: var(--primary);
+  color: black;
+  padding: 1rem 1.8rem;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: 0.2s;
+}
+
+.addButton:hover {
+  background: var(--primary-dark);
+}
+
+/* --- FORM DE ADICIONAR PRODUTO --- */
+.newForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  background: rgba(255,255,255,0.04);
+}
+
+.newForm input,
+.newForm textarea {
+  width: 100%;
+  padding: 1rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: white;
+  border-radius: 0.5rem;
+}
+
+.saveButton {
+  margin-top: 0.5rem;
+  background: var(--primary);
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.4rem;
+}
+
+.saveButton:hover {
+  background: var(--primary-dark);
+}
+
+/* --- TABELA DE PRODUTOS --- */
+.productTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5rem;
+  font-size: 1.4rem;
+}
+
+.productTable th {
+  padding: 1rem;
+  background: rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+  color: var(--primary);
+  text-align: left;
+}
+
+.productTable td {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.thumbnail {
+  width: 60px;
+  border-radius: 0.5rem;
+}
+
+/* Ações */
+.actionsCell {
+  display: flex;
+  gap: 1rem;
+}
+
+.actionButton,
+.deleteButton {
+  background: rgba(255,255,255,0.1);
+  padding: 0.6rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.actionButton:hover {
+  background: var(--primary);
+  color: black;
+}
+
+.deleteButton:hover {
+  background: #d33;
+  color: white;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .container {
+    margin-top: 5rem;
+    padding: 1.5rem;
+  }
+
+  .productTable {
+    font-size: 1.2rem;
+  }
 }
