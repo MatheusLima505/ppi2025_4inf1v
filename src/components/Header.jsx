@@ -20,8 +20,8 @@ export function Header() {
         </Link>
         {session && (
           <Link to="/user" className={styles.welcomeMessage}>
-            Welcome, {session.user.user_metadata.username}{" "}
-            {isAdmin && "⭐"} {/* Exibe estrela se for Admin */}
+            Bem vindo, {session.user.user_metadata.username}{" "}
+            {isAdmin}
           </Link>
         )}
       </div>
