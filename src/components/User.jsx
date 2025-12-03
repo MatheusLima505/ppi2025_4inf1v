@@ -6,15 +6,19 @@ import { CartContext } from "../context/CartContext";
 import { Trash2, Edit, Save, Plus } from "lucide-react";
 
 export function User() {
-  const { session, handleSignOut, sessionLoading } = useContext(SessionContext);
+  const { session, profile, handleSignOut, sessionLoading } =
+    useContext(SessionContext);
+
   const {
     products,
     loading,
     error,
     adminTools,
-    isAdmin,
     fetchProducts,
   } = useContext(CartContext);
+
+  // Agora 100% consistente com SessionContext
+  const isAdmin = profile?.admin === true;
 
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
@@ -26,13 +30,15 @@ export function User() {
   });
   const [isAdding, setIsAdding] = useState(false);
 
-  const [notes, setNotes] = useState("");
+  // ---- Monitor Admin + Carregar produtos apenas quando necessário ----
   useEffect(() => {
-    console.log(isAdmin+"chaves")
-    if (isAdmin && products.length === 0) {
-      fetchProducts();
+    if (profile === null) return; // ainda carregando o profile
+    console.log("isAdmin:", isAdmin);
+
+    if (isAdmin) {
+      fetchProducts(); // admin pode ver tudo
     }
-  }, [isAdmin, products.length, fetchProducts]);
+  }, [isAdmin, profile]);
 
   // --- Funções CRUD Admin ---
 
@@ -62,8 +68,7 @@ export function User() {
     if (success) {
       setEditingId(null);
       setEditForm({});
-      // ATUALIZAÇÃO VIA ESTADO (Instantânea)
-      await fetchProducts(); 
+      fetchProducts();
     }
   }
 
@@ -72,8 +77,7 @@ export function User() {
     if (window.confirm("Are you sure you want to delete this product?")) {
       const success = await adminTools.removeProduct(productId);
       if (success) {
-        // ATUALIZAÇÃO VIA ESTADO (Instantânea)
-        await fetchProducts(); 
+        fetchProducts();
       }
     }
   }
@@ -87,17 +91,17 @@ export function User() {
     e.preventDefault();
     if (!isAdmin || sessionLoading) return;
 
-    const priceValue = parseFloat(newForm.price) || 0;
-
     const success = await adminTools.addProduct({
       title: newForm.title,
       description: newForm.description,
-      price: priceValue,
+      price: parseFloat(newForm.price) || 0,
       thumbnail: newForm.thumbnail,
     });
+
     if (success) {
-      // RECARREGA A PÁGINA APÓS ADICIONAR (Como solicitado)
-      window.location.reload(); 
+      setIsAdding(false);
+      setNewForm({ title: "", description: "", price: "", thumbnail: "" });
+      fetchProducts();
     }
   }
 
@@ -122,23 +126,42 @@ export function User() {
         ) : (
           <h1>User Account</h1>
         )}
+
         <div className={styles.userInfo}>
           <div className={styles.fields}>
             <label className={styles.label}>Username</label>
-            <input className={styles.input} value={session.user.user_metadata?.username || "-"} readOnly />
+            <input
+              className={styles.input}
+              value={profile?.username || "-"}
+              readOnly
+            />
 
             <label className={styles.label}>Email</label>
-            <input className={styles.input} value={session.user.email || "-"} readOnly />
+            <input
+              className={styles.input}
+              value={session.user.email || "-"}
+              readOnly
+            />
 
             <label className={styles.label}>ID</label>
-            <input className={styles.input} value={session.user.id || "-"} readOnly />
+            <input
+              className={styles.input}
+              value={session.user.id || "-"}
+              readOnly
+            />
           </div>
         </div>
-        <button className={styles.button} onClick={handleSignOut} disabled={sessionLoading}>
+
+        <button
+          className={styles.button}
+          onClick={handleSignOut}
+          disabled={sessionLoading}
+        >
           SIGN OUT
         </button>
       </div>
 
+      {/* Painel do Admin */}
       {isAdmin && (
         <div className={styles.adminPanel}>
           <div className={styles.header}>
@@ -147,13 +170,7 @@ export function User() {
               className={styles.addButton}
               onClick={() => setIsAdding(!isAdding)}
             >
-              {isAdding ? (
-                "Cancel Add"
-              ) : (
-                <>
-                  <Plus size={20} /> Add New Product
-                </>
-              )}
+              {isAdding ? "Cancel Add" : <><Plus size={20} /> Add New Product</>}
             </button>
           </div>
 
@@ -225,6 +242,8 @@ export function User() {
                         className={styles.thumbnail}
                       />
                     </td>
+
+                    {/* Title */}
                     <td>
                       {editingId === product.id ? (
                         <input
@@ -237,6 +256,8 @@ export function User() {
                         product.title
                       )}
                     </td>
+
+                    {/* Description */}
                     <td>
                       {editingId === product.id ? (
                         <textarea
@@ -248,6 +269,8 @@ export function User() {
                         product.description.substring(0, 100) + "..."
                       )}
                     </td>
+
+                    {/* Price */}
                     <td>
                       {editingId === product.id ? (
                         <input
@@ -261,6 +284,8 @@ export function User() {
                         `$${product.price.toFixed(2)}`
                       )}
                     </td>
+
+                    {/* Actions */}
                     <td className={styles.actionsCell}>
                       {editingId === product.id ? (
                         <button
@@ -277,6 +302,7 @@ export function User() {
                           <Edit size={20} />
                         </button>
                       )}
+
                       <button
                         className={styles.deleteButton}
                         onClick={() => handleDelete(product.id)}

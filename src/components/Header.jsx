@@ -8,9 +8,8 @@ import { ThemeToggle } from "./ThemeToggle";
 
 export function Header() {
   const { cart } = useContext(CartContext);
-  const { session } = useContext(SessionContext);
-  // isAdmin ainda é útil para mostrar o ícone de estrela na mensagem de boas-vindas
-  const isAdmin = session?.user?.user_metadata?.admin === true; 
+  const { session, profile } = useContext(SessionContext);
+  const isAdmin = profile?.admin === true; 
 
   return (
     <div className={styles.container}>
@@ -20,7 +19,7 @@ export function Header() {
         </Link>
         {session && (
           <Link to="/user" className={styles.welcomeMessage}>
-            Bem vindo, {session.user.user_metadata.username}{" "}
+            Bem vindo, {profile?.username}{" "}
             {isAdmin}
           </Link>
         )}

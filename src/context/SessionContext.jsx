@@ -1,128 +1,74 @@
-import { useState, useEffect, createContext } from "react";
+import { createContext, useState, useEffect } from "react";
 import { supabase } from "../utils/supabase";
-import { toast, Bounce } from "react-toastify";
 
-export const SessionContext = createContext({
-  session: null,
-  sessionLoading: false,
-  handleSignUp: () => {},
-  handleSignIn: () => {},
-  handleSignOut: () => {},
-});
+export const SessionContext = createContext();
 
 export function SessionProvider({ children }) {
   const [session, setSession] = useState(null);
-  const [sessionLoading, setSessionLoading] = useState(false);
-  const [sessionMessage, setSessionMessage] = useState(null);
-  const [sessionError, setSessionError] = useState(null);
+  const [sessionLoading, setSessionLoading] = useState(true);
+
+  const [profile, setProfile] = useState(null); // username + isadmin
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+    // Verifica sessão atual
+    const current = supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session || null);
+      setSessionLoading(false);
     });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
+    // Listener para login/logout
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, newSession) => {
+        setSession(newSession);
+        if (newSession?.user) {
+          fetchProfile(newSession.user.id);
+        } else {
+          setProfile(null);
+        }
+      }
+    );
 
-    return () => subscription.unsubscribe();
+    return () => listener.subscription.unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (sessionMessage) {
-      toast.success(sessionMessage, {
-        position: "top-center",
-        autoClose: 5000,
-        theme: localStorage.getItem("theme"),
-        transition: Bounce,
-      });
-      setSessionMessage(null);
-    }
-    if (sessionError) {
-      toast.error(sessionError, {
-        position: "top-center",
-        autoClose: 5000,
-        theme: localStorage.getItem("theme"),
-        transition: Bounce,
-      });
-      setSessionError(null);
-    }
-  }, [sessionMessage, sessionError]);
+  // ---- Busca o perfil na tabela "profiles"
+  async function fetchProfile(userId) {
+    if (!userId) return;
 
-  async function handleSignUp(email, password, username) {
-    setSessionLoading(true);
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            username: username,
-            admin: false,
-          },
-          emailRedirectTo: `${window.location.origin}/signin`,
-        },
-      });
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("username, admin")
+      .eq("id", userId)
+      .single();
 
-      if (error) throw error;
-      setSessionMessage(
-        "Registration successful! Check your email to confirm your account."
-      );
-      return { success: true };
-    } catch (error) {
-      setSessionError(error.message);
-      return { success: false };
-    } finally {
-      setSessionLoading(false);
+    if (error) {
+      console.error("Erro ao carregar perfil:", error);
+      return;
     }
+
+    setProfile(data);
+    console.log("DEBUG PROFILE:", data);
+    console.log("TIPO ADMIN:", typeof data.admin);
+
   }
 
-  async function handleSignIn(email, password) {
-    setSessionLoading(true);
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-      if (data.session) {
-        setSessionMessage("Sign in successful!");
-      }
-      return { success: true };
-    } catch (error) {
-      setSessionError(error.message);
-      return { success: false };
-    } finally {
-      setSessionLoading(false);
-    }
-  }
-
+  // ---- Logout
   async function handleSignOut() {
-    setSessionLoading(true);
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      setSessionMessage("Sign out successful!");
-    } catch (error) {
-      setSessionError(error.message);
-    } finally {
-      setSessionLoading(false);
-    }
+    await supabase.auth.signOut();
+    setProfile(null);
+    setSession(null);
   }
-
-  const context = {
-    session,
-    sessionLoading,
-    handleSignUp,
-    handleSignIn,
-    handleSignOut,
-  };
 
   return (
-    <SessionContext.Provider value={context}>
+    <SessionContext.Provider
+      value={{
+        session,
+        sessionLoading,
+        profile,
+        isAdmin: profile?.isadmin === true,
+        handleSignOut,
+      }}
+    >
       {children}
     </SessionContext.Provider>
   );
